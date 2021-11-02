@@ -19,11 +19,7 @@ interface Product {
 
 const Cart = (): JSX.Element => {
   const { cart, removeProduct, updateProductAmount } = useCart();
-  console.log("Carrinho", cart)
-
-  const cartFormatted = cart.map(product => ({
-    // TODO
-  }))
+  
   const total =
     formatPrice(
       cart.reduce((sumTotal, product) => {

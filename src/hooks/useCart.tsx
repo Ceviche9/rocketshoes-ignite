@@ -1,9 +1,7 @@
-import { throws } from 'assert';
-import { error } from 'console';
 import { createContext, ReactNode, useContext, useState } from 'react';
 import { toast } from 'react-toastify';
 import { api } from '../services/api';
-import { Product, Stock } from '../types';
+import { Product } from '../types';
 
 interface CartProviderProps {
   children: ReactNode;
@@ -26,7 +24,7 @@ const CartContext = createContext<CartContextData>({} as CartContextData);
 export function CartProvider({ children }: CartProviderProps): JSX.Element {
   const [cart, setCart] = useState<Product[]>(() => {
     const storagedCart = localStorage.getItem('@RocketShoes:cart')
-
+    
     if (storagedCart) {
       return JSON.parse(storagedCart);
     }
@@ -35,6 +33,8 @@ export function CartProvider({ children }: CartProviderProps): JSX.Element {
   });
 
   const addProduct = async (productId: number) => {
+    const storagedCart = localStorage.getItem('@RocketShoes:cart')
+    console.log("Cart do storage", storagedCart)
     try {
       const updatedCart = cart.map(product => ({...product}))
       // Retorna o produto caso ele exista no carrinho.
@@ -56,6 +56,8 @@ export function CartProvider({ children }: CartProviderProps): JSX.Element {
         if (productExistsOnCart) {
           const newCart = cart.map(product => product.id === productId ? {...product, amount} : product)
           setCart(newCart)
+          // Salvando no localStorage.
+          localStorage.setItem('@RocketShoes:cart', JSON.stringify(newCart))
           // Caso o produto não exista, a chave amount é criada entro o objeto "product" e é adicionado ao carrinho.
         } else {
           const product = await api.get(`/products/${productId}`)
@@ -66,10 +68,11 @@ export function CartProvider({ children }: CartProviderProps): JSX.Element {
           }
           updatedCart.push(newProduct)
           setCart(updatedCart)
+          // Salvando no localStorage.
+          localStorage.setItem('@RocketShoes:cart', JSON.stringify(updatedCart))
         }
       }
-      // Salvando no localStorage.
-      localStorage.setItem('@RocketShoes:cart', JSON.stringify(updatedCart))
+      console.log("Cart do storage após a mudança", storagedCart)
     } catch {
       toast.error('Erro na adição do produto');
     }
